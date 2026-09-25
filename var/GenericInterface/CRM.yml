@@ -1,0 +1,88 @@
+---
+Debugger:
+  DebugThreshold: debug
+  TestMode: '0'
+Description: Ticket Connector REST
+FrameworkVersion: 5.0.23
+Provider:
+  Operation:
+    CustomerCreate:
+      Description: ''
+      MappingInbound: {}
+      MappingOutbound: {}
+      Type: CustomerUser::CustomerCreate
+    CustomerUserCreate:
+      Description: ''
+      MappingInbound: {}
+      MappingOutbound: {}
+      Type: CustomerUser::CustomerUserCreate
+    SessionCreate:
+      Description: Creates a Session
+      MappingInbound: {}
+      MappingOutbound: {}
+      Type: Session::SessionCreate
+    TicketCreate:
+      Description: Creates a Ticket
+      MappingInbound: {}
+      MappingOutbound: {}
+      Type: Ticket::TicketCreate
+    TicketGet:
+      Description: Retrieves Ticket data
+      MappingInbound: {}
+      MappingOutbound: {}
+      Type: Ticket::TicketGet
+    TicketSearch:
+      Description: Search for Tickets
+      MappingInbound: {}
+      MappingOutbound: {}
+      Type: Ticket::TicketSearch
+    TicketUpdate:
+      Description: Updates a Ticket
+      MappingInbound: {}
+      MappingOutbound: {}
+      Type: Ticket::TicketUpdate
+  Transport:
+    Config:
+      KeepAlive: ''
+      MaxLength: '100000000'
+      RouteOperationMapping:
+        CustomerCreate:
+          RequestMethod:
+          - POST
+          Route: /CustomerCreate
+        CustomerUserCreate:
+          RequestMethod:
+          - POST
+          Route: /CustomerUserCreate
+        SessionCreate:
+          RequestMethod:
+          - POST
+          Route: /Session
+        TicketCreate:
+          RequestMethod:
+          - POST
+          Route: /Ticket
+        TicketGet:
+          RequestMethod:
+          - GET
+          Route: /Ticket/:TicketID
+        TicketSearch:
+          RequestMethod:
+          - GET
+          Route: /Ticket
+        TicketUpdate:
+          RequestMethod:
+          - PATCH
+          Route: /Ticket/:TicketID
+    Type: HTTP::REST
+RemoteSystem: ''
+Requester:
+  Transport:
+    Config:
+      Authentication:
+        Password: test
+        Type: BasicAuth
+        User: reneeb
+      DefaultCommand: GET
+      Host: https://www.otrs.com:10745/api/v1.0
+    Type: HTTP::REST
