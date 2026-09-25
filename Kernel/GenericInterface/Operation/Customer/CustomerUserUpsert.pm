@@ -1,38 +1,46 @@
 # --
-# Copyright (C) 2018 Perl-Services.de, http://perl-services.de
+# OTOBO is a web-based ticketing system for service organisations.
 # --
-# This software comes with ABSOLUTELY NO WARRANTY. For details, see
-# the enclosed file COPYING for license information (AGPL). If you
-# did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
+# Copyright (C) 2001-2020 OTRS AG, https://otrs.com/
+# Copyright (C) 2019-2026 Rother OSS GmbH, https://otobo.io/
+# --
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 # --
 
-package Kernel::GenericInterface::Operation::CustomerUser::CustomerUserCreate;
+package Kernel::GenericInterface::Operation::Customer::CustomerUserUpsert;
 
+use v5.24;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
-
-use base qw(
+use parent qw(
     Kernel::GenericInterface::Operation::Common
-    Kernel::GenericInterface::Operation::CustomerUser::Common
+    Kernel::GenericInterface::Operation::Customer::Common
 );
+
+# core modules
+
+# CPAN modules
+
+# OTOBO modules
+use Kernel::System::VariableCheck qw(IsArrayRefWithData IsHashRefWithData IsString IsStringWithData);
 
 our $ObjectManagerDisabled = 1;
 
 =head1 NAME
 
-Kernel::GenericInterface::Operation::CustomerUser::CustomerUserCreate
-
-=head1 SYNOPSIS
+Kernel::GenericInterface::Operation::Customer::CustomerUserUpsert - GenericInterface Customer CustomerUserUpsert Operation backend
 
 =head1 PUBLIC INTERFACE
 
-=over 4
-
-=cut
-
-=item new()
+=head2 new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Operation->new();
@@ -57,38 +65,53 @@ sub new {
         $Self->{$Needed} = $Param{$Needed};
     }
 
-    $Self->{Config} = $Kernel::OM->Get('Kernel::Config')->Get('GenericInterface::Operation::CustomerUserCreate');
+    $Self->{Config} = $Kernel::OM->Get('Kernel::Config')->Get('GenericInterface::Operation::CustomerUserUpsert');
 
     return $Self;
 }
 
-=item Run()
+=head2 Run()
 
-perform CustomerUserCreate Operation. This will return the created customer number.
+perform CustomerUserUpsert Operation. This function is able to accept
+one or more customer user entries in one call and returns successfully
+inserted or updated customer user IDs.
 
     my $Result = $OperationObject->Run(
         Data => {
-            UserLogin => 'some agent login',       # UserLogin or SessionID is required
+            UserLogin => 'some agent login',        # UserLogin or SessionID is required
             SessionID => 123,
-            Password  => 'some password',          # if UserLogin is sent then Password is required
+            Password  => 'some password',           # if UserLogin is sent then Password is required
 
-            CustomerUser => {
-                UserLogin      => 'tc',
-                UserFirstname  => 'Test',
-                UserLastname   => 'Customer',
-                UserCustomerID => '12345',
-                ValidID        => 1,
-            },
+            CustomerUser => [                       # required
+                {
+                    UserLogin      => 'tc',
+                    UserFirstname  => 'Test',
+                    UserLastname   => 'Customer',
+                    UserCustomerID => '12345',
+                    ValidID        => 1, UserEmail UserCompanyID
+                },
+                {
+                    # . . .
+                },
+            ],
         },
     );
 
     $Result = {
-        Success         => 1,                       # 0 or 1
-        ErrorMessage    => '',                      # in case of error
-        Data            => {                        # result data payload after Operation
-            UserLogin   => 'tc',
-            Error => {                              # should not return errors
-                    ErrorCode    => 'CustomerUser.Create.ErrorCode'
+        Success         => 1,    # 0 or 1
+        ErrorMessage    => '',   # in case of error
+        Data            => {     # result data payload after Operation
+            CustomerUser => [                                         # includes all customers users that
+                                                                      # have been successfully upserted
+                {
+                    UserLogin   => 'tc',
+                },
+                {
+                    # . . .
+                },
+            ],
+            Error => {                                                # should not return errors
+                    ErrorCode    => 'CustomerUser.Upsert.ErrorCode'
                     ErrorMessage => 'Error Description'
             },
         },
@@ -104,7 +127,7 @@ sub Run {
     );
 
     if ( !$Result->{Success} ) {
-        $Self->ReturnError(
+        return $Self->ReturnError(
             ErrorCode    => 'Webservice.InvalidConfiguration',
             ErrorMessage => $Result->{ErrorMessage},
         );
@@ -117,8 +140,8 @@ sub Run {
         )
     {
         return $Self->ReturnError(
-            ErrorCode    => 'CustomerUserCreate.MissingParameter',
-            ErrorMessage => "CustomerUserCreate: UserLogin or SessionID is required!",
+            ErrorCode    => 'CustomerUserUpsert.MissingParameter',
+            ErrorMessage => "CustomerUserUpsert: UserLogin or SessionID is required!",
         );
     }
 
@@ -127,8 +150,8 @@ sub Run {
         if ( !$Param{Data}->{Password} )
         {
             return $Self->ReturnError(
-                ErrorCode    => 'CustomerUserCreate.MissingParameter',
-                ErrorMessage => "CustomerUserCreate: Password or SessionID is required!",
+                ErrorCode    => 'CustomerUserUpsert.MissingParameter',
+                ErrorMessage => "CustomerUserUpsert: Password or SessionID is required!",
             );
         }
     }
@@ -140,58 +163,90 @@ sub Run {
 
     if ( !$UserID ) {
         return $Self->ReturnError(
-            ErrorCode    => 'CustomerUserCreate.AuthFail',
-            ErrorMessage => "CustomerUserCreate: User could not be authenticated!",
+            ErrorCode    => 'CustomerUserUpsert.AuthFail',
+            ErrorMessage => "CustomerUserUpsert: User could not be authenticated!",
         );
     }
 
     my $PermissionUserID = $UserID;
 
-    # check needed hashes
+    # check needed stuff
     for my $Needed (qw(CustomerUser)) {
-        if ( !IsHashRefWithData( $Param{Data}->{$Needed} ) ) {
+        if ( !$Param{Data}->{$Needed} ) {
             return $Self->ReturnError(
-                ErrorCode    => 'CustomerUserCreate.MissingParameter',
-                ErrorMessage => "CustomerUserCreate: $Needed parameter is missing or not valid!",
+                ErrorCode    => 'CustomerUserUpsert.MissingParameter',
+                ErrorMessage => "CustomerUserUpsert: $Needed parameter is missing or not valid!",
             );
         }
     }
 
-    # isolate customer parameter
-    my $CustomerUser = $Param{Data}->{CustomerUser};
+    # transform single customer users to an array reference
+    if ( !IsArrayRefWithData( $Param{Data}{CustomerUser} ) ) {
+        $Param{Data}{CustomerUser} = [ $Param{Data}{CustomerUser} ];
+    }
 
-    # remove leading and trailing spaces
-    for my $Attribute ( sort keys %{$CustomerUser} ) {
-        if ( ref $Attribute ne 'HASH' && ref $Attribute ne 'ARRAY' ) {
+    $Result = {
+        Success => 1,
+        Data    => {
+            CustomerUser => [],
+        }
+    };
 
-            #remove leading spaces
+    # upsert each customer user
+    for my $CustomerUser ( @{ $Param{Data}{CustomerUser} } ) {
+
+        # remove leading and trailing spaces
+        ATTRIBUTE:
+        for my $Attribute ( sort keys %{$CustomerUser} ) {
+            next ATTRIBUTE if !$CustomerUser->{$Attribute};
+            next ATTRIBUTE if ref $CustomerUser->{$Attribute} eq 'HASH';
+            next ATTRIBUTE if ref $CustomerUser->{$Attribute} eq 'ARRAY';
+
             $CustomerUser->{$Attribute} =~ s{\A\s+}{};
-
-            #remove trailing spaces
             $CustomerUser->{$Attribute} =~ s{\s+\z}{};
         }
+
+        my $CustomerUserCheck = $Self->_CheckCustomerUser( CustomerUser => $CustomerUser );
+
+        # if an error occurs, return, but still include all customer users already upserted
+        if ( !$CustomerUserCheck->{Success} ) {
+            $Result->{Success}       = 0;
+            $Result->{ErrorMessage}  = "$CustomerUserCheck->{ErrorCode}: $CustomerUserCheck->{ErrorMessage}";
+            $Result->{Data}->{Error} = {
+                ErrorCode    => $CustomerUserCheck->{ErrorCode},
+                ErrorMessage => $CustomerUserCheck->{ErrorMessage},
+            };
+
+            return $Result;
+        }
+
+        my $UpsertResult = $Self->_CustomerUserUpsert(
+            CustomerUser => $CustomerUser,
+            UserID       => $UserID,
+        );
+
+        # if an error occurs, return, but still include all customer users already upserted
+        if ( !$UpsertResult->{Success} ) {
+            $Result->{Success}      = 0;
+            $Result->{ErrorMessage} = $UpsertResult->{ErrorMessage};
+
+            return $Result;
+        }
+
+        push @{ $Result->{Data}->{CustomerUser} }, $UpsertResult->{Data};
     }
 
-    my $CustomerUserCheck = $Self->_CheckCustomerUser( CustomerUser => $CustomerUser );
-
-    if ( !$CustomerUserCheck->{Success} ) {
-        return $Self->ReturnError( %{$CustomerUserCheck} );
-    }
-
-    return $Self->_CustomerUserCreate(
-        CustomerUser => $CustomerUser,
-        UserID   => $UserID,
-    );
+    return $Result;
 }
 
 =begin Internal:
 
-=item _CheckCustomerUser()
+=head2 _CheckCustomerUser()
 
-checks if the given customer parameters are valid.
+checks if the given customer user parameters are valid.
 
     my $CustomerUserCheck = $OperationObject->_CheckCustomerUser(
-        CustomerUser => $CustomerUser,                          # all customer parameters
+        CustomerUser => $CustomerUser,                          # all customer user parameters
     );
 
     returns:
@@ -212,12 +267,12 @@ sub _CheckCustomerUser {
 
     my $CustomerUser = $Param{CustomerUser};
 
-    # check customer internally
-    for my $Needed (qw(UserFirstname UserLastname UserLogin UserEmail UserCompanyID)) {
+    # check customer user internally
+    for my $Needed (qw(UserFirstname UserLastname UserLogin UserEmail UserCustomerID)) {
         if ( !$CustomerUser->{$Needed} ) {
             return {
-                ErrorCode    => 'CustomerUserCreate.MissingParameter',
-                ErrorMessage => "CustomerUserCreate: CustomerUser->$Needed parameter is missing!",
+                ErrorCode    => 'CustomerUserUpsert.MissingParameter',
+                ErrorMessage => "CustomerUseUpsertt: CustomerUser->$Needed parameter is missing!",
             };
         }
     }
@@ -228,12 +283,12 @@ sub _CheckCustomerUser {
     };
 }
 
-=item _CustomerUserCreate()
+=head2 _CustomerUserUpsert()
 
-creates a customer with its article and sets dynamic fields and attachments if specified.
+inserts or creates a customer user.
 
-    my $Response = $OperationObject->_CustomerUserCreate(
-        CustomerUser => $CustomerUser,       # all customer parameters
+    my $Response = $OperationObject->_CustomerUserUpsert(
+        CustomerUser => $CustomerUser,       # all customer user parameters
         UserID   => 123,
     );
 
@@ -253,19 +308,19 @@ creates a customer with its article and sets dynamic fields and attachments if s
 
 =cut
 
-sub _CustomerUserCreate {
+sub _CustomerUserUpsert {
     my ( $Self, %Param ) = @_;
 
     my $CustomerUser = $Param{CustomerUser} // {};
 
-    # get customer object
+    # get customer user object
     my $CustomerUserObject = $Kernel::OM->Get('Kernel::System::CustomerUser');
 
     # create new customer
     my $CustomerUserID = $CustomerUserObject->CustomerUserAdd(
-        %{ $CustomerUser },
-        ValidID      => $CustomerUser->{ValidID} // 1,
-        UserID       => $Param{UserID},
+        %{$CustomerUser},
+        ValidID => $CustomerUser->{ValidID} // 1,
+        UserID  => $Param{UserID},
     );
 
     if ( !$CustomerUserID ) {
@@ -299,8 +354,6 @@ sub _CustomerUserCreate {
 1;
 
 =end Internal:
-
-=back
 
 =head1 TERMS AND CONDITIONS
 

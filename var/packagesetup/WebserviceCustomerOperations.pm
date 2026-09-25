@@ -1,12 +1,12 @@
 # --
-# var/packagesetup/DenicGIArticleSend.pm - code to excecute during package installation
+# var/packagesetup/WebserviceCustomerOperations.pm - code to excecute during package installation
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-package var::packagesetup::DenicGIArticleSend;
+package var::packagesetup::WebserviceCustomerOperations;
 
 use strict;
 use warnings;
@@ -20,6 +20,7 @@ use Kernel::System::VariableCheck qw(:all);
 
 our @ObjectDependencies = qw(
     Kernel::Config
+    Kernel::System::Main
     Kernel::System::SysConfig
     Kernel::System::GenericInterface::Webservice
     Kernel::System::YAML
@@ -28,7 +29,7 @@ our @ObjectDependencies = qw(
 
 =head1 NAME
 
-var::packagesetup::DenicGIArticleSend.pm - code to excecute during package installation
+var::packagesetup::WebserviceCustomerOperations - code to excecute during package installation
 
 =head1 SYNOPSIS
 
@@ -67,7 +68,7 @@ run the code install part
 sub CodeInstall {
     my ( $Self, %Param ) = @_;
 
-    # create dynamic fields 
+    # create dynamic fields
     $Self->_InstallWebservice();
 
     return 1;
@@ -122,7 +123,7 @@ sub CodeUninstall {
 =cut
 
 sub _InstallWebservice {
-    my ($Self, %Param) = @_;
+    my ( $Self, %Param ) = @_;
 
     my $YAMLObject = $Kernel::OM->Get('Kernel::System::YAML');
     my $Location   = join '/',
@@ -158,7 +159,7 @@ sub _InstallWebservice {
     # check if name is duplicated
     my %WebserviceList = reverse %{ $WebserviceObject->WebserviceList() };
 
-    if ( $WebserviceList{ $WebserviceName } ) {
+    if ( $WebserviceList{$WebserviceName} ) {
         my $Success = $WebserviceObject->WebserviceUpdate(
             Name    => $WebserviceName,
             Config  => $ImportedConfig,
@@ -174,6 +175,8 @@ sub _InstallWebservice {
         ValidID => 1,
         UserID  => 1,
     );
+
+    return 1;
 }
 
 1;
@@ -187,4 +190,3 @@ the enclosed file COPYING for license information (GPL). If you
 did not receive this file, see L<http://www.gnu.org/licenses/gpl-2.0.txt>.
 
 =cut
-

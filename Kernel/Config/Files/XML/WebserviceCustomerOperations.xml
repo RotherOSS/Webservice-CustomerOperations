@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <otrs_config version="1.0" init="Config">
-    <ConfigItem Name="GenericInterface::Operation::Module###CustomerUser::CustomerCreate" Required="0" Valid="1">
+    <Setting Name="GenericInterface::Operation::Module###Customer::CustomerUpsert" Required="0" Valid="1">
         <Description Translatable="1">GenericInterface module registration for the operation layer.</Description>
-        <Group>DENIC</Group>
-        <SubGroup>GenericInterface::Operation::ModuleRegistration</SubGroup>
-        <Setting>
+        <Navigation>GenericInterface::Operation::ModuleRegistration::Webservice-CustomerOperations</Navigation>
+        <Value>
             <Hash>
-                <Item Key="Name">CustomerCreate</Item>
-                <Item Key="Controller">CustomerUser</Item>
+                <Item Key="Name">CustomerUpsert</Item>
+                <Item Key="Controller">Customer</Item>
                 <Item Key="ConfigDialog">AdminGenericInterfaceOperationDefault</Item>
             </Hash>
-        </Setting>
-    </ConfigItem>
-    <ConfigItem Name="GenericInterface::Operation::Module###CustomerUser::CustomerUserCreate" Required="0" Valid="1">
+        </Value>
+    </Setting>
+    <Setting Name="GenericInterface::Operation::Module###Customer::CustomerUserUpsert" Required="0" Valid="1">
         <Description Translatable="1">GenericInterface module registration for the operation layer.</Description>
-        <Group>DENIC</Group>
-        <SubGroup>GenericInterface::Operation::ModuleRegistration</SubGroup>
-        <Setting>
+        <Navigation>GenericInterface::Operation::ModuleRegistration::Webservice-CustomerOperations</Navigation>
+        <Value>
             <Hash>
-                <Item Key="Name">CustomerUserCreate</Item>
-                <Item Key="Controller">CustomerUser</Item>
+                <Item Key="Name">CustomerUserUpsert</Item>
+                <Item Key="Controller">Customer</Item>
                 <Item Key="ConfigDialog">AdminGenericInterfaceOperationDefault</Item>
             </Hash>
-        </Setting>
-    </ConfigItem>
+        </Value>
+    </Setting>
 </otrs_config>

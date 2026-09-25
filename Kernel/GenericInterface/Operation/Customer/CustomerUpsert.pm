@@ -1,38 +1,46 @@
 # --
-# Copyright (C) 2018 Perl-Services.de, http://perl-services.de
+# OTOBO is a web-based ticketing system for service organisations.
 # --
-# This software comes with ABSOLUTELY NO WARRANTY. For details, see
-# the enclosed file COPYING for license information (AGPL). If you
-# did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
+# Copyright (C) 2001-2020 OTRS AG, https://otrs.com/
+# Copyright (C) 2019-2026 Rother OSS GmbH, https://otobo.io/
+# --
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later version.
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 # --
 
-package Kernel::GenericInterface::Operation::CustomerUser::CustomerCreate;
+package Kernel::GenericInterface::Operation::Customer::CustomerUpsert;
 
+use v5.24;
 use strict;
 use warnings;
 
-use Kernel::System::VariableCheck qw(:all);
-
-use base qw(
+use parent qw(
     Kernel::GenericInterface::Operation::Common
-    Kernel::GenericInterface::Operation::CustomerUser::Common
+    Kernel::GenericInterface::Operation::Customer::Common
 );
+
+# core modules
+
+# CPAN modules
+
+# OTOBO modules
+use Kernel::System::VariableCheck qw(IsArrayRefWithData IsHashRefWithData IsString IsStringWithData);
 
 our $ObjectManagerDisabled = 1;
 
 =head1 NAME
 
-Kernel::GenericInterface::Operation::CustomerUser::CustomerCreate
-
-=head1 SYNOPSIS
+Kernel::GenericInterface::Operation::Customer::CustomerUpsert - GenericInterface Customer CustomerUpsert Operation backend
 
 =head1 PUBLIC INTERFACE
 
-=over 4
-
-=cut
-
-=item new()
+=head2 new()
 
 usually, you want to create an instance of this
 by using Kernel::GenericInterface::Operation->new();
@@ -57,39 +65,51 @@ sub new {
         $Self->{$Needed} = $Param{$Needed};
     }
 
-    $Self->{Config} = $Kernel::OM->Get('Kernel::Config')->Get('GenericInterface::Operation::CustomerCreate');
+    $Self->{Config} = $Kernel::OM->Get('Kernel::Config')->Get('GenericInterface::Operation::CustomerUpsert');
 
     return $Self;
 }
 
-=item Run()
+=head2 Run()
 
-perform CustomerCreate Operation. This will return the created customer number.
+perform CustomerUpsert Operation. This function is able to accept
+one or more customer entries in one call and returns successfully
+inserted or updated customer IDs.
 
     my $Result = $OperationObject->Run(
         Data => {
-            UserLogin         => 'some agent login',                            # UserLogin or SessionID is
-                                                                                #   required
+            UserLogin         => 'some agent login',   # UserLogin or SessionID is required
             SessionID => 123,
-            Password  => 'some password',                                       # if UserLogin is sent then Password is required
+            Password  => 'some password',              # if UserLogin is sent then Password is required
 
-            Customer => {
-                CustomerID   => '12345',
-                CustomerName => 'Test Inc.',
-            },
+            Customer => [                              # required
+                {
+                    CustomerID   => '12345',
+                    CustomerName => 'Test Inc.',
+                },
+                {
+                    # . . .
+                },
+            ],
         },
     );
 
     $Result = {
-        Success         => 1,                       # 0 or 1
-        ErrorMessage    => '',                      # in case of error
-        Data            => {                        # result data payload after Operation
-            CustomerID    => 123,                     # Customer  ID number in OTRS (help desk system)
-            CustomerNumber => 2324454323322           # Customer Number in OTRS (Help desk system)
-            ArticleID   => 43,                      # Article ID number in OTRS (help desk system)
-            Error => {                              # should not return errors
-                    ErrorCode    => 'Customer.Create.ErrorCode'
-                    ErrorMessage => 'Error Description'
+        Success         => 1,    # 0 or 1
+        ErrorMessage    => '',   # in case of error
+        Data            => {     # result data payload after Operation
+            Customer => [                                     # includes all customers that
+                                                              # have been successfully upserted
+                {
+                    CustomerID    => 123,
+                },
+                {
+                    # . . .
+                }
+            ],
+            Error => {                                        # should not return errors
+                ErrorCode    => 'Customer.Upsert.ErrorCode'
+                ErrorMessage => 'Error Description'
             },
         },
     };
@@ -104,7 +124,7 @@ sub Run {
     );
 
     if ( !$Result->{Success} ) {
-        $Self->ReturnError(
+        return $Self->ReturnError(
             ErrorCode    => 'Webservice.InvalidConfiguration',
             ErrorMessage => $Result->{ErrorMessage},
         );
@@ -117,8 +137,8 @@ sub Run {
         )
     {
         return $Self->ReturnError(
-            ErrorCode    => 'CustomerCreate.MissingParameter',
-            ErrorMessage => "CustomerCreate: UserLogin or SessionID is required!",
+            ErrorCode    => 'CustomerUpsert.MissingParameter',
+            ErrorMessage => "CustomerUpsert: UserLogin or SessionID is required!",
         );
     }
 
@@ -127,8 +147,8 @@ sub Run {
         if ( !$Param{Data}->{Password} )
         {
             return $Self->ReturnError(
-                ErrorCode    => 'CustomerCreate.MissingParameter',
-                ErrorMessage => "CustomerCreate: Password or SessionID is required!",
+                ErrorCode    => 'CustomerUpsert.MissingParameter',
+                ErrorMessage => "CustomerUpsert: Password or SessionID is required!",
             );
         }
     }
@@ -140,53 +160,85 @@ sub Run {
 
     if ( !$UserID ) {
         return $Self->ReturnError(
-            ErrorCode    => 'CustomerCreate.AuthFail',
-            ErrorMessage => "CustomerCreate: User could not be authenticated!",
+            ErrorCode    => 'CustomerUpsert.AuthFail',
+            ErrorMessage => "CustomerUpsert: User could not be authenticated!",
         );
     }
 
     my $PermissionUserID = $UserID;
 
-    # check needed hashes
+    # check needed stuff
     for my $Needed (qw(Customer)) {
-        if ( !IsHashRefWithData( $Param{Data}->{$Needed} ) ) {
+        if ( !$Param{Data}->{$Needed} ) {
             return $Self->ReturnError(
-                ErrorCode    => 'CustomerCreate.MissingParameter',
-                ErrorMessage => "CustomerCreate: $Needed parameter is missing or not valid!",
+                ErrorCode    => 'CustomerUpsert.MissingParameter',
+                ErrorMessage => "CustomerUpsert: $Needed parameter is missing or not valid!",
             );
         }
     }
 
-    # isolate customer parameter
-    my $Customer = $Param{Data}->{Customer};
+    # transform single customers to an array reference
+    if ( !IsArrayRefWithData( $Param{Data}{Customer} ) ) {
+        $Param{Data}{Customer} = [ $Param{Data}{Customer} ];
+    }
 
-    # remove leading and trailing spaces
-    for my $Attribute ( sort keys %{$Customer} ) {
-        if ( ref $Attribute ne 'HASH' && ref $Attribute ne 'ARRAY' ) {
+    $Result = {
+        Success => 1,
+        Data    => {
+            Customer => [],
+        }
+    };
 
-            #remove leading spaces
+    # upsert each customer
+    for my $Customer ( @{ $Param{Data}{Customer} } ) {
+
+        # remove leading and trailing spaces
+        ATTRIBUTE:
+        for my $Attribute ( sort keys %{$Customer} ) {
+            next ATTRIBUTE if !$Customer->{$Attribute};
+            next ATTRIBUTE if ref $Customer->{$Attribute} eq 'HASH';
+            next ATTRIBUTE if ref $Customer->{$Attribute} eq 'ARRAY';
+
             $Customer->{$Attribute} =~ s{\A\s+}{};
-
-            #remove trailing spaces
             $Customer->{$Attribute} =~ s{\s+\z}{};
         }
+
+        my $CustomerCheck = $Self->_CheckCustomer( Customer => $Customer );
+
+        # if an error occurs, return, but still include all customers already upserted
+        if ( !$CustomerCheck->{Success} ) {
+            $Result->{Success}       = 0;
+            $Result->{ErrorMessage}  = "$CustomerCheck->{ErrorCode}: $CustomerCheck->{ErrorMessage}";
+            $Result->{Data}->{Error} = {
+                ErrorCode    => $CustomerCheck->{ErrorCode},
+                ErrorMessage => $CustomerCheck->{ErrorMessage},
+            };
+
+            return $Result;
+        }
+
+        my $UpsertResult = $Self->_CustomerUpsert(
+            Customer => $Customer,
+            UserID   => $UserID,
+        );
+
+        # if an error occurs, return, but still include all customers already upserted
+        if ( !$UpsertResult->{Success} ) {
+            $Result->{Success}      = 0;
+            $Result->{ErrorMessage} = $UpsertResult->{ErrorMessage};
+
+            return $Result;
+        }
+
+        push @{ $Result->{Data}->{Customer} }, $UpsertResult->{Data};
     }
 
-    my $CustomerCheck = $Self->_CheckCustomer( Customer => $Customer );
-
-    if ( !$CustomerCheck->{Success} ) {
-        return $Self->ReturnError( %{$CustomerCheck} );
-    }
-
-    return $Self->_CustomerCreate(
-        Customer => $Customer,
-        UserID   => $UserID,
-    );
+    return $Result;
 }
 
 =begin Internal:
 
-=item _CheckCustomer()
+=head2 _CheckCustomer()
 
 checks if the given customer parameters are valid.
 
@@ -216,8 +268,8 @@ sub _CheckCustomer {
     for my $Needed (qw(CustomerID CustomerCompanyName)) {
         if ( !$Customer->{$Needed} ) {
             return {
-                ErrorCode    => 'CustomerCreate.MissingParameter',
-                ErrorMessage => "CustomerCreate: Customer->$Needed parameter is missing!",
+                ErrorCode    => 'CustomerUpsert.MissingParameter',
+                ErrorMessage => "CustomerUpsert: Customer->$Needed parameter is missing!",
             };
         }
     }
@@ -228,11 +280,11 @@ sub _CheckCustomer {
     };
 }
 
-=item _CustomerCreate()
+=head2 _CustomerUpsert()
 
-creates a customer with its article and sets dynamic fields and attachments if specified.
+inserts or creates a customer.
 
-    my $Response = $OperationObject->_CustomerCreate(
+    my $Response = $OperationObject->_CustomerUpsert(
         Customer => $Customer,       # all customer parameters
         UserID   => 123,
     );
@@ -253,7 +305,7 @@ creates a customer with its article and sets dynamic fields and attachments if s
 
 =cut
 
-sub _CustomerCreate {
+sub _CustomerUpsert {
     my ( $Self, %Param ) = @_;
 
     my $Customer = $Param{Customer};
@@ -301,11 +353,7 @@ sub _CustomerCreate {
 
 =end Internal:
 
-=back
-
 =head1 TERMS AND CONDITIONS
-
-This software is part of the OTRS project (L<http://otrs.org/>).
 
 This software comes with ABSOLUTELY NO WARRANTY. For details, see
 the enclosed file COPYING for license information (AGPL). If you
