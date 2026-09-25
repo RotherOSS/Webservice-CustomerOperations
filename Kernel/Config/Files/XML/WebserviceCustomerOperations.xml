@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<otrs_config version="1.0" init="Config">
+<otobo_config version="2.0" init="Config">
     <Setting Name="GenericInterface::Operation::Module###Customer::CustomerUpsert" Required="0" Valid="1">
         <Description Translatable="1">GenericInterface module registration for the operation layer.</Description>
         <Navigation>GenericInterface::Operation::ModuleRegistration::Webservice-CustomerOperations</Navigation>
@@ -22,4 +22,4 @@
             </Hash>
         </Value>
     </Setting>
-</otrs_config>
+</otobo_config>
