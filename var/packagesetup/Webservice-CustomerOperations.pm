@@ -1,12 +1,12 @@
 # --
-# var/packagesetup/Webservice-CustomerOperations.pm - code to excecute during package installation
+# var/packagesetup/WebserviceCustomerOperations.pm - code to excecute during package installation
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-package var::packagesetup::Webservice-CustomerOperations;
+package var::packagesetup::WebserviceCustomerOperations;
 
 use strict;
 use warnings;
@@ -29,7 +29,7 @@ our @ObjectDependencies = qw(
 
 =head1 NAME
 
-var::packagesetup::Webservice-CustomerOperations - code to excecute during package installation
+var::packagesetup::WebserviceCustomerOperations - code to excecute during package installation
 
 =head1 SYNOPSIS
 
