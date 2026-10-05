@@ -14,7 +14,7 @@
         <File Permission="660" Location="Kernel/GenericInterface/Operation/Customer/CustomerUserUpsert.pm" />
         <File Permission="660" Location="Kernel/Config/Files/XML/WebserviceCustomerOperations.xml" />
         <File Permission="660" Location="var/GenericInterface/CRM.yml" />
-        <File Permission="660" Location="var/packagesetup/WebserviceCustomerOperations.pm" />
+        <File Permission="660" Location="var/packagesetup/Webservice-CustomerOperations.pm" />
     </Filelist>
     <CodeInstall Type="post"><![CDATA[
         $Kernel::OM->Get('var::packagesetup::' . $Param{Structure}->{Name}->{Content} )->CodeInstall();
