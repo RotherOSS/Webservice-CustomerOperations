@@ -67,7 +67,7 @@ sub new {
 
 perform CustomerUserUpsert Operation. This function is able to accept
 one or more customer user entries in one call and returns successfully
-inserted or updated customer user IDs.
+inserted or updated customer user logins.
 
     my $Result = $OperationObject->Run(
         Data => {
@@ -77,11 +77,12 @@ inserted or updated customer user IDs.
 
             CustomerUser => {                                         # Single customer user or customer user list is required
                 UserLogin      => 'tc',
+                ID             => 'oldtc',                            # required for UserLogin-update
                 UserPassword   => 'some-pass',                        # not required
                 UserFirstname  => 'Test',
                 UserLastname   => 'Customer',
                 UserEmail      => 'test.customer@example.com',
-                UserCustomerID => '12345',
+                UserCustomerID => '12345',                            # only considered (and is required) when inserting
                 ValidID        => 1,
             },
             CustomerUser => [
@@ -289,7 +290,7 @@ sub _CheckCustomerUser {
 
 =head2 _CustomerUserUpsert()
 
-inserts or creates a customer user.
+updates or inserts a customer user.
 
     my $Response = $OperationObject->_CustomerUserUpsert(
         CustomerUser => $CustomerUser,                                # all customer user parameters
@@ -315,27 +316,51 @@ inserts or creates a customer user.
 sub _CustomerUserUpsert {
     my ( $Self, %Param ) = @_;
 
-    my $CustomerUser = $Param{CustomerUser} // {};
+    my $CustomerUser      = $Param{CustomerUser};
+    my $CustomerUserLogin = $CustomerUser->{UserLogin};
+
+    # customer users are by default valid
+    $CustomerUser->{ValidID} //= 1;
 
     # get customer user object
     my $CustomerUserObject = $Kernel::OM->Get('Kernel::System::CustomerUser');
 
-    # create new customer
-    my $CustomerUserID = $CustomerUserObject->CustomerUserAdd(
-        %{$CustomerUser},
-        ValidID => $CustomerUser->{ValidID} // 1,
-        UserID  => $Param{UserID},
-    );
+    # check whether this customer user exists (update) or is new (insert)
+    $CustomerUser->{ID} ||= $CustomerUser->{UserLogin};
 
-    if ( !$CustomerUserID ) {
-        return {
-            Success      => 0,
-            ErrorMessage => 'CustomerUser could not be created, please contact the system administrator',
-        };
+    my %User = $CustomerUserObject->CustomerUserDataGet(
+        User   => $Customer->{ID}
+        UserID => $Param{UserID},
+    );
+    if ( %User ) {
+        my $Success = $CustomerUserObject->CustomerUserUpdate(
+            %{$CustomerUser},
+            UserID => $Param{UserID},
+        );
+
+        if ( !$Success ) {
+            return {
+                Success      => 0,
+                ErrorMessage => 'Customer could not be updated, please contact the system administrator',
+            };
+        }
+    }
+    else {
+        $CustomerUserLogin = $CustomerUserObject->CustomerUserAdd(
+            %{$Customer},
+            UserID => $Param{UserID},
+        );
+
+        if ( !$CustomerUserLogin ) {
+            return {
+                Success      => 0,
+                ErrorMessage => 'Customer could not be inserted, please contact the system administrator',
+            };
+        }
     }
 
     my %CustomerUserData = $CustomerUserObject->CustomerUserDataGet(
-        User   => $CustomerUser->{UserLogin},
+        User   => $CustomerUserLogin,
         UserID => $Param{UserID},
     );
 
@@ -350,7 +375,7 @@ sub _CustomerUserUpsert {
     return {
         Success => 1,
         Data    => {
-            UserLogin => $CustomerUserData{UserLogin},
+            UserLogin => $CustomerUserLogin,
         },
     };
 }
