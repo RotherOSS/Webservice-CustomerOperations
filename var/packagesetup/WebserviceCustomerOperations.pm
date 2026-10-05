@@ -115,6 +115,8 @@ run the code uninstall part
 sub CodeUninstall {
     my ( $Self, %Param ) = @_;
 
+    $Self->_UninstallWebservice();
+
     return 1;
 }
 
@@ -179,6 +181,35 @@ sub _InstallWebservice {
     return 1;
 }
 
+=item _UninstallWebservice()
+
+=cut
+
+sub _UninstallWebservice {
+    my ( $Self, %Param ) = @_;
+
+    my $Location   = join '/',
+        $Kernel::OM->Get('Kernel::Config')->Get('Home'),
+        qw/var GenericInterface CRM.yml/;
+
+    # get webservice name
+    my $WebserviceName   = basename $Location;
+    my $WebserviceObject = $Kernel::OM->Get('Kernel::System::GenericInterface::Webservice');
+
+    # remove file extension
+    $WebserviceName =~ s{\.[^.]+$}{}g;
+
+    # check if name is duplicated
+    my %WebserviceList = reverse %{ $WebserviceObject->WebserviceList() };
+
+    # delete webservice and return to overview screen
+    my $Success = $WebserviceObject->WebserviceDelete(
+        ID     => $WebserviceList{$WebserviceName},
+        UserID => 1,
+    );
+
+    return 1;
+}
 1;
 
 =back
