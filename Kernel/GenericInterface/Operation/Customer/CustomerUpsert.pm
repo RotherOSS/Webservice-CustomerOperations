@@ -71,20 +71,20 @@ inserted or updated customer IDs.
 
     my $Result = $OperationObject->Run(
         Data => {
-            UserLogin => 'some agent login',               # UserLogin or SessionID is required
+            UserLogin => 'some agent login',                 # UserLogin or SessionID is required
             SessionID => 123,
-            Password  => 'some password',                  # if UserLogin is sent then Password is required
+            Password  => 'some password',                    # if UserLogin is sent then Password is required
 
-            Customer => {                                  # Single customer or customer list is required
+            Customer => {                                    # Single customer or customer list is required
                 CustomerID          => 'test.com',
+                CustomerCompanyID   => 'oldtest.com',        # required for CustomerID-update
                 CustomerCompanyName => 'Test Inc.',
-                CustomerCompanyID   => 'oldtest.com',      # required for CustomerID-update
             },
             Customer => [
                 {
-                    CustomerID          => '12345',
-                    CustomerCompanyName => 'Test Inc.',
+                    CustomerID          => 'test.com',
                     CustomerCompanyID   => 'oldtest.com',
+                    CustomerCompanyName => 'Test Inc.',
                 },
                 {
                     # . . .
@@ -281,7 +281,7 @@ sub _CheckCustomer {
 
 =head2 _CustomerUpsert()
 
-inserts or creates a customer.
+updates or inserts a customer.
 
     my $Response = $OperationObject->_CustomerUpsert(
         Customer => $Customer,                                        # all customer parameters
@@ -316,7 +316,7 @@ sub _CustomerUpsert {
     # get customer object
     my $CustomerObject = $Kernel::OM->Get('Kernel::System::CustomerCompany');
 
-    # check whether this customer exists (update) or is new (create)
+    # check whether this customer exists (update) or is new (insert)
     $Customer->{CustomerCompanyID} ||= $Customer->{CustomerID};
 
     my %Company = $CustomerObject->CustomerCompanyGet( CustomerID => $Customer->{CustomerCompanyID} );
