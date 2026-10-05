@@ -6,16 +6,16 @@ Description: Ticket Connector REST
 FrameworkVersion: 5.0.23
 Provider:
   Operation:
-    CustomerCreate:
+    CustomerUpsert:
       Description: ''
       MappingInbound: {}
       MappingOutbound: {}
-      Type: CustomerUser::CustomerCreate
-    CustomerUserCreate:
+      Type: Customer::CustomerUpsert
+    CustomerUserUpsert:
       Description: ''
       MappingInbound: {}
       MappingOutbound: {}
-      Type: CustomerUser::CustomerUserCreate
+      Type: Customer::CustomerUserUpsert
     SessionCreate:
       Description: Creates a Session
       MappingInbound: {}
@@ -46,14 +46,14 @@ Provider:
       KeepAlive: ''
       MaxLength: '100000000'
       RouteOperationMapping:
-        CustomerCreate:
+        CustomerUpsert:
           RequestMethod:
           - POST
-          Route: /CustomerCreate
-        CustomerUserCreate:
+          Route: /CustomerUpsert
+        CustomerUserUpsert:
           RequestMethod:
           - POST
-          Route: /CustomerUserCreate
+          Route: /CustomerUserUpsert
         SessionCreate:
           RequestMethod:
           - POST
