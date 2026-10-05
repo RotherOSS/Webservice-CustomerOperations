@@ -76,13 +76,15 @@ inserted or updated customer IDs.
             Password  => 'some password',                  # if UserLogin is sent then Password is required
 
             Customer => {                                  # Single customer or customer list is required
-                CustomerID          => '12345',
+                CustomerID          => 'test.com',
                 CustomerCompanyName => 'Test Inc.',
+                CustomerCompanyID   => 'oldtest.com',      # required for CustomerID-update
             },
             Customer => [
                 {
                     CustomerID          => '12345',
                     CustomerCompanyName => 'Test Inc.',
+                    CustomerCompanyID   => 'oldtest.com',
                 },
                 {
                     # . . .
@@ -305,24 +307,44 @@ inserts or creates a customer.
 sub _CustomerUpsert {
     my ( $Self, %Param ) = @_;
 
-    my $Customer = $Param{Customer};
+    my $Customer   = $Param{Customer};
+    my $CustomerID = $Customer->{CustomerID};
+
+    # customers are by default valid
+    $Customer->{ValidID} //= 1;
 
     # get customer object
     my $CustomerObject = $Kernel::OM->Get('Kernel::System::CustomerCompany');
 
-    # create new customer
-    my $CustomerID = $CustomerObject->CustomerCompanyAdd(
-        CustomerID          => $Customer->{CustomerID},
-        CustomerCompanyName => $Customer->{CustomerCompanyName},
-        ValidID             => $Customer->{ValidID} // 1,
-        UserID              => $Param{UserID},
-    );
+    # check whether this customer exists (update) or is new (create)
+    $Customer->{CustomerCompanyID} ||= $Customer->{CustomerID};
 
-    if ( !$CustomerID ) {
-        return {
-            Success      => 0,
-            ErrorMessage => 'Customer could not be created, please contact the system administrator',
-        };
+    my %Company = $CustomerObject->CustomerCompanyGet( CustomerID => $Customer->{CustomerCompanyID} );
+    if ( %Company ) {
+        my $Success = $CustomerObject->CustomerCompanyUpdate(
+            %{$Customer},
+            UserID => $Param{UserID},
+        );
+
+        if ( !$Success ) {
+            return {
+                Success      => 0,
+                ErrorMessage => 'Customer could not be updated, please contact the system administrator',
+            };
+        }
+    }
+    else {
+        $CustomerID = $CustomerObject->CustomerCompanyAdd(
+            %{$Customer},
+            UserID => $Param{UserID},
+        );
+
+        if ( !$CustomerID ) {
+            return {
+                Success      => 0,
+                ErrorMessage => 'Customer could not be inserted, please contact the system administrator',
+            };
+        }
     }
 
     my %CustomerData = $CustomerObject->CustomerCompanyGet(
