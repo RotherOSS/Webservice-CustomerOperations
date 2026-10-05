@@ -71,11 +71,18 @@ inserted or updated customer user IDs.
 
     my $Result = $OperationObject->Run(
         Data => {
-            UserLogin => 'some agent login',        # UserLogin or SessionID is required
+            UserLogin => 'some agent login',                        # UserLogin or SessionID is required
             SessionID => 123,
-            Password  => 'some password',           # if UserLogin is sent then Password is required
+            Password  => 'some password',                           # if UserLogin is sent then Password is required
 
-            CustomerUser => [                       # required
+            CustomerUser => {                                       # Single CustomerUser or CustomerUser list is required
+                UserLogin      => 'tc',
+                UserFirstname  => 'Test',
+                UserLastname   => 'Customer',
+                UserCustomerID => '12345',
+                ValidID        => 1, UserEmail UserCompanyID
+            },
+            CustomerUser => [
                 {
                     UserLogin      => 'tc',
                     UserFirstname  => 'Test',
@@ -91,11 +98,11 @@ inserted or updated customer user IDs.
     );
 
     $Result = {
-        Success         => 1,    # 0 or 1
-        ErrorMessage    => '',   # in case of error
-        Data            => {     # result data payload after Operation
-            CustomerUser => [                                         # includes all customers users that
-                                                                      # have been successfully upserted
+        Success         => 1,                                          # 0 or 1
+        ErrorMessage    => '',                                         # in case of error
+        Data            => {                                           # result data payload after Operation
+            CustomerUser => [                                          # includes all customers users that
+                                                                       # have been successfully upserted
                 {
                     UserLogin   => 'tc',
                 },
@@ -103,7 +110,7 @@ inserted or updated customer user IDs.
                     # . . .
                 },
             ],
-            Error => {                                                # should not return errors
+            Error => {                                                 # should not return errors
                     ErrorCode    => 'CustomerUser.Upsert.ErrorCode'
                     ErrorMessage => 'Error Description'
             },
@@ -239,17 +246,17 @@ sub Run {
 checks if the given customer user parameters are valid.
 
     my $CustomerUserCheck = $OperationObject->_CheckCustomerUser(
-        CustomerUser => $CustomerUser,                          # all customer user parameters
+        CustomerUser => $CustomerUser,                               # all customer user parameters
     );
 
     returns:
 
     $CustomerUserCheck = {
-        Success => 1,                               # if everything is OK
+        Success => 1,                                                # if everything is OK
     }
 
     $CustomerUserCheck = {
-        ErrorCode    => 'Function.Error',           # if error
+        ErrorCode    => 'Function.Error',                            # if error
         ErrorMessage => 'Error description',
     }
 
@@ -281,21 +288,21 @@ sub _CheckCustomerUser {
 inserts or creates a customer user.
 
     my $Response = $OperationObject->_CustomerUserUpsert(
-        CustomerUser => $CustomerUser,       # all customer user parameters
+        CustomerUser => $CustomerUser,                                # all customer user parameters
         UserID   => 123,
     );
 
     returns:
 
     $Response = {
-        Success => 1,                # if everething is OK
+        Success => 1,                                                 # if everething is OK
         Data => {
             CustomerUserID => 123,
         }
     }
 
     $Response = {
-        Success      => 0,           # if unexpected error
+        Success      => 0,                                            # if unexpected error
         ErrorMessage => "$Param{ErrorCode}: $Param{ErrorMessage}",
     }
 
