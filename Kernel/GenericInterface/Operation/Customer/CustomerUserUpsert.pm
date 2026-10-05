@@ -75,7 +75,7 @@ inserted or updated customer user IDs.
             SessionID => 123,
             Password  => 'some password',                             # if UserLogin is sent then Password is required
 
-            CustomerUser => {                                         # Single CustomerUser or CustomerUser list is required
+            CustomerUser => {                                         # Single customer user or customer user list is required
                 UserLogin      => 'tc',
                 UserPassword   => 'some-pass',                        # not required
                 UserFirstname  => 'Test',
@@ -293,14 +293,14 @@ inserts or creates a customer user.
 
     my $Response = $OperationObject->_CustomerUserUpsert(
         CustomerUser => $CustomerUser,                                # all customer user parameters
-        UserID   => 123,
+        UserID       => 123,
     );
 
     returns:
 
     $Response = {
         Success => 1,                                                 # if everething is OK
-        Data => {
+        Data    => {
             CustomerUserID => 123,
         }
     }

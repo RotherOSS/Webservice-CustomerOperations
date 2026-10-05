@@ -71,18 +71,18 @@ inserted or updated customer IDs.
 
     my $Result = $OperationObject->Run(
         Data => {
-            UserLogin         => 'some agent login',    # UserLogin or SessionID is required
+            UserLogin => 'some agent login',               # UserLogin or SessionID is required
             SessionID => 123,
-            Password  => 'some password',               # if UserLogin is sent then Password is required
+            Password  => 'some password',                  # if UserLogin is sent then Password is required
 
-            Customer => {                               # Single Customer or Customer list is required
-                CustomerID   => '12345',
-                CustomerName => 'Test Inc.',
+            Customer => {                                  # Single customer or customer list is required
+                CustomerID          => '12345',
+                CustomerCompanyName => 'Test Inc.',
             },
             Customer => [
                 {
-                    CustomerID   => '12345',
-                    CustomerName => 'Test Inc.',
+                    CustomerID          => '12345',
+                    CustomerCompanyName => 'Test Inc.',
                 },
                 {
                     # . . .
@@ -290,7 +290,7 @@ inserts or creates a customer.
 
     $Response = {
         Success => 1,                                                 # if everething is OK
-        Data => {
+        Data    => {
             CustomerID => 123,
         }
     }
