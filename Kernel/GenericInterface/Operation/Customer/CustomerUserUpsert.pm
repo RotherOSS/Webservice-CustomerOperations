@@ -71,24 +71,28 @@ inserted or updated customer user IDs.
 
     my $Result = $OperationObject->Run(
         Data => {
-            UserLogin => 'some agent login',                        # UserLogin or SessionID is required
+            UserLogin => 'some agent login',                          # UserLogin or SessionID is required
             SessionID => 123,
-            Password  => 'some password',                           # if UserLogin is sent then Password is required
+            Password  => 'some password',                             # if UserLogin is sent then Password is required
 
-            CustomerUser => {                                       # Single CustomerUser or CustomerUser list is required
+            CustomerUser => {                                         # Single CustomerUser or CustomerUser list is required
                 UserLogin      => 'tc',
+                UserPassword   => 'some-pass',                        # not required
                 UserFirstname  => 'Test',
                 UserLastname   => 'Customer',
+                UserEmail      => 'test.customer@example.com',
                 UserCustomerID => '12345',
-                ValidID        => 1, UserEmail UserCompanyID
+                ValidID        => 1,
             },
             CustomerUser => [
                 {
                     UserLogin      => 'tc',
+                    UserPassword   => 'some-pass',
                     UserFirstname  => 'Test',
                     UserLastname   => 'Customer',
+                    UserEmail      => 'test.customer@example.com',
                     UserCustomerID => '12345',
-                    ValidID        => 1, UserEmail UserCompanyID
+                    ValidID        => 1,
                 },
                 {
                     # . . .
