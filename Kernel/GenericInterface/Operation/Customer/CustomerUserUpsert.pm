@@ -82,7 +82,7 @@ inserted or updated customer user logins.
                 UserFirstname  => 'Test',
                 UserLastname   => 'Customer',
                 UserEmail      => 'test.customer@example.com',
-                UserCustomerID => '12345',                            # only considered (and is required) when inserting
+                UserCustomerID => '12345',                            # required when inserting
                 ValidID        => 1,
             },
             CustomerUser => [
@@ -273,7 +273,7 @@ sub _CheckCustomerUser {
     my $CustomerUser = $Param{CustomerUser};
 
     # check customer user internally
-    for my $Needed (qw(UserFirstname UserLastname UserLogin UserEmail UserCustomerID)) {
+    for my $Needed (qw(UserFirstname UserLastname UserLogin UserEmail)) {
         if ( !$CustomerUser->{$Needed} ) {
             return {
                 ErrorCode    => 'CustomerUserUpsert.MissingParameter',
@@ -346,6 +346,14 @@ sub _CustomerUserUpsert {
         }
     }
     else {
+        # when adding a new customer user, the customer (company) is required
+        if ( !$CustomerUser->{UserCustomerID} ) {
+            return {
+                ErrorCode    => 'CustomerUserUpsert.MissingParameter',
+                ErrorMessage => "CustomerUseUpsertt: CustomerUser->UserCustomerID parameter is missing!",
+            };
+        }
+
         $CustomerUserLogin = $CustomerUserObject->CustomerUserAdd(
             %{$Customer},
             UserID => $Param{UserID},
