@@ -113,16 +113,10 @@ inserted or updated customer IDs.
         Success         => 1,                                  # 0 or 1
         ErrorMessage    => '',                                 # in case of error
         Data            => {                                   # result data payload after Operation
-            Customer => [                                      # includes all customers that
-                                                               # have been successfully upserted
-                {
-                    CustomerID    => 123,
-                },
-                {
-                    # . . .
-                }
-            ],
-            Error => {                                         # should not return errors
+            CustomerID => '123',                               # returns single customer or list of all
+                                                               # successfully inserted/updated customer
+            CustomerID => ['123', '456'],
+            Error      => {                                    # should not return errors
                 ErrorCode    => 'Customer.Upsert.ErrorCode'
                 ErrorMessage => 'Error Description'
             },
@@ -192,17 +186,20 @@ sub Run {
         }
     }
 
+    my SingleCustomer;
+    my $Result = {
+        Success => 1,
+        Data    => {},
+    };
+
     # transform single customers to an array reference
     if ( !IsArrayRefWithData( $Param{Data}{Customer} ) ) {
         $Param{Data}{Customer} = [ $Param{Data}{Customer} ];
+        $SingleCustomer        = 1;
     }
-
-    $Result = {
-        Success => 1,
-        Data    => {
-            Customer => [],
-        }
-    };
+    else {
+        $Result->{Data}->{CustomerID} = [];
+    }
 
     # upsert each customer
     for my $Customer ( @{ $Param{Data}{Customer} } ) {
@@ -245,7 +242,12 @@ sub Run {
             return $Result;
         }
 
-        push @{ $Result->{Data}->{Customer} }, $UpsertResult->{Data};
+        if ( $SingleCustomer ) {
+            $Result->{Data}->{CustomerID} = $UpsertResult->{CustomerID};
+        }
+        else {
+            push @{ $Result->{Data}->{CustomerID} }, $UpsertResult->{CustomerID};
+        }
     }
 
     return $Result;
@@ -390,10 +392,8 @@ sub _CustomerUpsert {
     }
 
     return {
-        Success => 1,
-        Data    => {
-            CustomerID => $CustomerID,
-        },
+        Success    => 1,
+        CustomerID => $CustomerID,
     };
 }
 

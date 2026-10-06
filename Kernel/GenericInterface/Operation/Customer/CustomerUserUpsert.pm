@@ -108,18 +108,12 @@ inserted or updated customer user logins.
         Success         => 1,                                          # 0 or 1
         ErrorMessage    => '',                                         # in case of error
         Data            => {                                           # result data payload after Operation
-            CustomerUser => [                                          # includes all customers users that
-                                                                       # have been successfully upserted
-                {
-                    UserLogin   => 'tc',
-                },
-                {
-                    # . . .
-                },
-            ],
-            Error => {                                                 # should not return errors
-                    ErrorCode    => 'CustomerUser.Upsert.ErrorCode'
-                    ErrorMessage => 'Error Description'
+            CustomerUser => 'tc',                                      # returns single customer user or list of all
+                                                                       # successfully inserted/updated customer users
+            CustomerUser => ['tc', 'tc2'],
+            Error        => {                                          # should not return errors
+                ErrorCode    => 'CustomerUser.Upsert.ErrorCode'
+                ErrorMessage => 'Error Description'
             },
         },
     };
@@ -187,17 +181,20 @@ sub Run {
         }
     }
 
+    my SingleCustomerUser;
+    my $Result = {
+        Success => 1,
+        Data    => {},
+    };
+
     # transform single customer users to an array reference
     if ( !IsArrayRefWithData( $Param{Data}{CustomerUser} ) ) {
         $Param{Data}{CustomerUser} = [ $Param{Data}{CustomerUser} ];
+        $SingleCustomerUser        = 1;
     }
-
-    $Result = {
-        Success => 1,
-        Data    => {
-            CustomerUser => [],
-        }
-    };
+    else {
+        $Result->{Data}->{CustomerUser} = [];
+    }
 
     # upsert each customer user
     for my $CustomerUser ( @{ $Param{Data}{CustomerUser} } ) {
@@ -240,7 +237,12 @@ sub Run {
             return $Result;
         }
 
-        push @{ $Result->{Data}->{CustomerUser} }, $UpsertResult->{Data};
+        if ( $SingleCustomerUser ) {
+            $Result->{Data}->{CustomerUser} = $UpsertResult->{UserLogin};
+        }
+        else {
+            push @{ $Result->{Data}->{CustomerUser} }, $UpsertResult->{UserLogin};
+        }
     }
 
     return $Result;
@@ -383,10 +385,8 @@ sub _CustomerUserUpsert {
     }
 
     return {
-        Success => 1,
-        Data    => {
-            UserLogin => $CustomerUserLogin,
-        },
+        Success   => 1,
+        UserLogin => $CustomerUserLogin,
     };
 }
 
