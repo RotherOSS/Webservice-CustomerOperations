@@ -105,13 +105,13 @@ inserted or updated customer user logins.
     );
 
     $Result = {
-        Success         => 1,                                          # 0 or 1
-        ErrorMessage    => '',                                         # in case of error
-        Data            => {                                           # result data payload after Operation
-            CustomerUser => 'tc',                                      # returns single customer user or list of all
-                                                                       # successfully inserted/updated customer users
-            CustomerUser => ['tc', 'tc2'],
-            Error        => {                                          # should not return errors
+        Success         => 1,                                      # 0 or 1
+        ErrorMessage    => '',                                     # in case of error
+        Data            => {                                       # result data payload after Operation
+            UserLogin => 'tc',                                     # returns single customer user or list of all
+                                                                   # successfully inserted/updated customer users
+            UserLogin => ['tc', 'tc2'],
+            Error     => {                                         # should not return errors
                 ErrorCode    => 'CustomerUser.Upsert.ErrorCode'
                 ErrorMessage => 'Error Description'
             },
@@ -193,7 +193,7 @@ sub Run {
         $SingleCustomerUser        = 1;
     }
     else {
-        $Result->{Data}->{CustomerUser} = [];
+        $Result->{Data}->{UserLogin} = [];
     }
 
     # upsert each customer user
@@ -238,10 +238,10 @@ sub Run {
         }
 
         if ( $SingleCustomerUser ) {
-            $Result->{Data}->{CustomerUser} = $UpsertResult->{UserLogin};
+            $Result->{Data}->{UserLogin} = $UpsertResult->{UserLogin};
         }
         else {
-            push @{ $Result->{Data}->{CustomerUser} }, $UpsertResult->{UserLogin};
+            push @{ $Result->{Data}->{UserLogin} }, $UpsertResult->{UserLogin};
         }
     }
 
@@ -320,8 +320,8 @@ updates or inserts a customer user.
 sub _CustomerUserUpsert {
     my ( $Self, %Param ) = @_;
 
-    my $CustomerUser      = $Param{CustomerUser};
-    my $CustomerUserLogin = $CustomerUser->{UserLogin};
+    my $CustomerUser = $Param{CustomerUser};
+    my $UserLogin    = $CustomerUser->{UserLogin};
 
     # customer users are by default valid
     $CustomerUser->{ValidID} //= 1;
@@ -358,12 +358,12 @@ sub _CustomerUserUpsert {
             };
         }
 
-        $CustomerUserLogin = $CustomerUserObject->CustomerUserAdd(
+        $UserLogin = $CustomerUserObject->CustomerUserAdd(
             %{$CustomerUser},
             UserID => $Param{UserID},
         );
 
-        if ( !$CustomerUserLogin ) {
+        if ( !$UserLogin ) {
             return {
                 Success      => 0,
                 ErrorMessage => 'Customer could not be inserted, please contact the system administrator',
@@ -372,7 +372,7 @@ sub _CustomerUserUpsert {
     }
 
     my %CustomerUserData = $CustomerUserObject->CustomerUserDataGet(
-        User   => $CustomerUserLogin,
+        User   => $UserLogin,
         UserID => $Param{UserID},
     );
 
@@ -386,7 +386,7 @@ sub _CustomerUserUpsert {
 
     return {
         Success   => 1,
-        UserLogin => $CustomerUserLogin,
+        UserLogin => $UserLogin,
     };
 }
 
