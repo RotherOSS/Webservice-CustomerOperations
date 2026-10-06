@@ -160,9 +160,11 @@ sub _InstallWebservice {
 
     # check if name is duplicated
     my %WebserviceList = reverse %{ $WebserviceObject->WebserviceList() };
+    my $WebserviceID = $WebserviceList{$WebserviceName};
 
-    if ( $WebserviceList{$WebserviceName} ) {
+    if ( $WebserviceID ) {
         my $Success = $WebserviceObject->WebserviceUpdate(
+            ID      => $WebserviceID,
             Name    => $WebserviceName,
             Config  => $ImportedConfig,
             ValidID => 1,
@@ -198,8 +200,8 @@ sub _UninstallWebservice {
 
     # remove file extension
     $WebserviceName =~ s{\.[^.]+$}{}g;
+    print STDERR "\n\n\n$WebserviceName\n\n\n";
 
-    # check if name is duplicated
     my %WebserviceList = reverse %{ $WebserviceObject->WebserviceList() };
 
     # delete webservice and return to overview screen
