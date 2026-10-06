@@ -77,7 +77,9 @@ inserted or updated customer IDs.
 
             Customer => {                                    # Single customer or customer list is required
                 CustomerID          => 'test.com',
-                CustomerCompanyID   => 'oldtest.com',        # required for CustomerID-update
+                CustomerCompanyID   => 'oldtest.com',        # required for CustomerID-update (if no such customer
+                                                             # exists, this will be ignored by the default mapping
+                                                             # and instead a new customer via CustomerID is inserted)
                 CustomerCompanyName => 'Test Inc.',
             },
             Customer => [

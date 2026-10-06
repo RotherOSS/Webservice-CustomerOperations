@@ -77,10 +77,12 @@ inserted or updated customer user logins.
 
             CustomerUser => {                                         # Single customer user or customer user list is required
                 UserLogin      => 'tc',
-                ID             => 'oldtc',                            # required for UserLogin-update
-                UserPassword   => 'some-pass',                        # not required
+                ID             => 'oldtc',                            # required for UserLogin-update (if no such customer user
+                                                                      # exists, this will be ignored by the default mapping and
+                                                                      # instead a new customer user via UserLogin is inserted)
                 UserFirstname  => 'Test',
                 UserLastname   => 'Customer',
+                UserPassword   => 'some-pass',                        # not required
                 UserEmail      => 'test.customer@example.com',
                 UserCustomerID => '12345',                            # required when inserting
                 ValidID        => 1,
