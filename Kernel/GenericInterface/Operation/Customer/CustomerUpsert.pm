@@ -322,7 +322,7 @@ sub _CustomerUpsert {
     my %Company = $CustomerObject->CustomerCompanyGet( CustomerID => $Customer->{CustomerCompanyID} );
     if ( %Company ) {
         # check if new CustomerID already exists
-        if ( lc $Customer->{CustomerID} ne lc $Customer->{CustomerCompanyID} ) {
+        if ( $Customer->{CustomerID} ne $Customer->{CustomerCompanyID} ) {
             my %Result = $CustomerObject->CustomerCompanyGet( User => $Customer->{CustomerID} );
             if (%Result) {
                 $Kernel::OM->Get('Kernel::System::Log')->Log(
