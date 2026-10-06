@@ -2,7 +2,7 @@
 <otobo_config version="2.0" init="Config">
     <Setting Name="GenericInterface::Operation::Module###Customer::CustomerUpsert" Required="0" Valid="1">
         <Description Translatable="1">GenericInterface module registration for the operation layer.</Description>
-        <Navigation>GenericInterface::Operation::ModuleRegistration::Webservice-CustomerOperations</Navigation>
+        <Navigation>GenericInterface::Operation::ModuleRegistration</Navigation>
         <Value>
             <Hash>
                 <Item Key="Name">CustomerUpsert</Item>
@@ -13,7 +13,7 @@
     </Setting>
     <Setting Name="GenericInterface::Operation::Module###Customer::CustomerUserUpsert" Required="0" Valid="1">
         <Description Translatable="1">GenericInterface module registration for the operation layer.</Description>
-        <Navigation>GenericInterface::Operation::ModuleRegistration::Webservice-CustomerOperations</Navigation>
+        <Navigation>GenericInterface::Operation::ModuleRegistration</Navigation>
         <Value>
             <Hash>
                 <Item Key="Name">CustomerUserUpsert</Item>
