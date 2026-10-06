@@ -71,16 +71,16 @@ inserted or updated customer IDs.
 
     my $Result = $OperationObject->Run(
         Data => {
-            UserLogin => 'some agent login',                 # UserLogin or SessionID is required
+            UserLogin => 'some agent login',                            # UserLogin or SessionID is required
             SessionID => 123,
-            Password  => 'some password',                    # if UserLogin is sent then Password is required
+            Password  => 'some password',                               # if UserLogin is sent then Password is required
 
-            Customer => {                                    # Single customer or customer list is required
-                CustomerID          => 'test.com',
-                CustomerCompanyID   => 'oldtest.com',        # required for CustomerID-update (if no such customer
-                                                             # exists, this will be ignored by the default mapping
-                                                             # and instead a new customer via CustomerID is inserted)
-                CustomerCompanyName => 'Test Inc.',
+            Customer => {                                               # Single customer or customer list is required
+                CustomerID              => 'test.com',
+                CustomerCompanyID       => 'oldtest.com',               # required for CustomerID-update (if no such customer
+                                                                        # exists, this will be ignored by the default mapping
+                                                                        # and instead a new customer via CustomerID is inserted)
+                CustomerCompanyName     => 'Test Inc.',
                 CustomerCompanyStreet   => '5201 Blue Lagoon Drive',
                 CustomerCompanyZIP      => '33126',
                 CustomerCompanyLocation => 'Miami',
