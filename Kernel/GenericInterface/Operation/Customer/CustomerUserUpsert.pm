@@ -123,14 +123,14 @@ inserted or updated customer user logins.
 sub Run {
     my ( $Self, %Param ) = @_;
 
-    my $Result = $Self->Init(
+    my $InitResult = $Self->Init(
         WebserviceID => $Self->{WebserviceID},
     );
 
-    if ( !$Result->{Success} ) {
+    if ( !$InitResult->{Success} ) {
         return $Self->ReturnError(
             ErrorCode    => 'Webservice.InvalidConfiguration',
-            ErrorMessage => $Result->{ErrorMessage},
+            ErrorMessage => $InitResult->{ErrorMessage},
         );
     }
 
@@ -181,7 +181,7 @@ sub Run {
         }
     }
 
-    my SingleCustomerUser;
+    my $SingleCustomerUser;
     my $Result = {
         Success => 1,
         Data    => {},
@@ -190,7 +190,7 @@ sub Run {
     # transform single customer users to an array reference
     if ( !IsArrayRefWithData( $Param{Data}{CustomerUser} ) ) {
         $Param{Data}{CustomerUser} = [ $Param{Data}{CustomerUser} ];
-        $SingleCustomerUser        = 1;
+        $SingleCustomerUser = 1;
     }
     else {
         $Result->{Data}->{UserLogin} = [];
@@ -237,7 +237,7 @@ sub Run {
             return $Result;
         }
 
-        if ( $SingleCustomerUser ) {
+        if ($SingleCustomerUser) {
             $Result->{Data}->{UserLogin} = $UpsertResult->{UserLogin};
         }
         else {

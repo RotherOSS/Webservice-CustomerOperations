@@ -128,14 +128,14 @@ inserted or updated customer IDs.
 sub Run {
     my ( $Self, %Param ) = @_;
 
-    my $Result = $Self->Init(
+    my $InitResult = $Self->Init(
         WebserviceID => $Self->{WebserviceID},
     );
 
-    if ( !$Result->{Success} ) {
+    if ( !$InitResult->{Success} ) {
         return $Self->ReturnError(
             ErrorCode    => 'Webservice.InvalidConfiguration',
-            ErrorMessage => $Result->{ErrorMessage},
+            ErrorMessage => $InitResult->{ErrorMessage},
         );
     }
 
@@ -186,7 +186,7 @@ sub Run {
         }
     }
 
-    my SingleCustomer;
+    my $SingleCustomer;
     my $Result = {
         Success => 1,
         Data    => {},
@@ -195,7 +195,7 @@ sub Run {
     # transform single customers to an array reference
     if ( !IsArrayRefWithData( $Param{Data}{Customer} ) ) {
         $Param{Data}{Customer} = [ $Param{Data}{Customer} ];
-        $SingleCustomer        = 1;
+        $SingleCustomer = 1;
     }
     else {
         $Result->{Data}->{CustomerID} = [];
@@ -242,7 +242,7 @@ sub Run {
             return $Result;
         }
 
-        if ( $SingleCustomer ) {
+        if ($SingleCustomer) {
             $Result->{Data}->{CustomerID} = $UpsertResult->{CustomerID};
         }
         else {
