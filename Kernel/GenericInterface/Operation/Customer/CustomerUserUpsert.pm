@@ -331,10 +331,10 @@ sub _CustomerUserUpsert {
     $CustomerUser->{ID} ||= $CustomerUser->{UserLogin};
 
     my %User = $CustomerUserObject->CustomerUserDataGet(
-        User   => $Customer->{ID}
+        User   => $CustomerUser->{ID},
         UserID => $Param{UserID},
     );
-    if ( %User ) {
+    if (%User) {
         my $Success = $CustomerUserObject->CustomerUserUpdate(
             %{$CustomerUser},
             UserID => $Param{UserID},
@@ -357,7 +357,7 @@ sub _CustomerUserUpsert {
         }
 
         $CustomerUserLogin = $CustomerUserObject->CustomerUserAdd(
-            %{$Customer},
+            %{$CustomerUser},
             UserID => $Param{UserID},
         );
 

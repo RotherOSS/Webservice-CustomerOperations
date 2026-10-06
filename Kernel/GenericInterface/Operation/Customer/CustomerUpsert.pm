@@ -322,7 +322,8 @@ sub _CustomerUpsert {
     $Customer->{CustomerCompanyID} ||= $Customer->{CustomerID};
 
     my %Company = $CustomerObject->CustomerCompanyGet( CustomerID => $Customer->{CustomerCompanyID} );
-    if ( %Company ) {
+    if (%Company) {
+
         # check if new CustomerID already exists
         if ( $Customer->{CustomerID} ne $Customer->{CustomerCompanyID} ) {
             my %Result = $CustomerObject->CustomerCompanyGet( User => $Customer->{CustomerID} );
