@@ -321,6 +321,18 @@ sub _CustomerUpsert {
 
     my %Company = $CustomerObject->CustomerCompanyGet( CustomerID => $Customer->{CustomerCompanyID} );
     if ( %Company ) {
+        # check if new CustomerID already exists
+        if ( lc $Customer->{CustomerID} ne lc $Customer->{CustomerCompanyID} ) {
+            my %Result = $CustomerObject->CustomerCompanyGet( User => $Customer->{CustomerID} );
+            if (%Result) {
+                $Kernel::OM->Get('Kernel::System::Log')->Log(
+                    Priority => 'error',
+                    Message  => $Kernel::OM->Get('Kernel::Language')->Translate( 'Customer "%s" already exists.', $Customer->{CustomerID} ),
+                );
+                return;
+            }
+        }
+
         my $Success = $CustomerObject->CustomerCompanyUpdate(
             %{$Customer},
             UserID => $Param{UserID},
