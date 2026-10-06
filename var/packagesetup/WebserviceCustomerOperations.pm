@@ -200,7 +200,6 @@ sub _UninstallWebservice {
 
     # remove file extension
     $WebserviceName =~ s{\.[^.]+$}{}g;
-    print STDERR "\n\n\n$WebserviceName\n\n\n";
 
     my %WebserviceList = reverse %{ $WebserviceObject->WebserviceList() };
 
