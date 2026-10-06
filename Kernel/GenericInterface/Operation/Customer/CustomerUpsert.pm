@@ -81,12 +81,26 @@ inserted or updated customer IDs.
                                                              # exists, this will be ignored by the default mapping
                                                              # and instead a new customer via CustomerID is inserted)
                 CustomerCompanyName => 'Test Inc.',
+                CustomerCompanyStreet   => '5201 Blue Lagoon Drive',
+                CustomerCompanyZIP      => '33126',
+                CustomerCompanyLocation => 'Miami',
+                CustomerCompanyCountry  => 'USA',
+                CustomerCompanyURL      => 'http://example.com',
+                CustomerCompanyComment  => 'some comment',
+                ValidID                 => 1,
             },
             Customer => [
                 {
                     CustomerID          => 'test.com',
                     CustomerCompanyID   => 'oldtest.com',
                     CustomerCompanyName => 'Test Inc.',
+                    CustomerCompanyStreet   => '5201 Blue Lagoon Drive',
+                    CustomerCompanyZIP      => '33126',
+                    CustomerCompanyLocation => 'Miami',
+                    CustomerCompanyCountry  => 'USA',
+                    CustomerCompanyURL      => 'http://example.com',
+                    CustomerCompanyComment  => 'some comment',
+                    ValidID                 => 1,
                 },
                 {
                     # . . .
