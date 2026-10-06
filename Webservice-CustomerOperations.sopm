@@ -13,16 +13,5 @@
         <File Permission="660" Location="Kernel/GenericInterface/Operation/Customer/CustomerUpsert.pm" />
         <File Permission="660" Location="Kernel/GenericInterface/Operation/Customer/CustomerUserUpsert.pm" />
         <File Permission="660" Location="Kernel/Config/Files/XML/WebserviceCustomerOperations.xml" />
-        <File Permission="660" Location="var/GenericInterface/CRM.yml" />
-        <File Permission="660" Location="var/packagesetup/WebserviceCustomerOperations.pm" />
     </Filelist>
-    <CodeInstall Type="post"><![CDATA[
-        $Kernel::OM->Get('var::packagesetup::WebserviceCustomerOperations')->CodeInstall();
-    ]]></CodeInstall>
-    <CodeUpgrade Type="post"><![CDATA[
-        $Kernel::OM->Get('var::packagesetup::WebserviceCustomerOperations')->CodeUpgrade();
-    ]]></CodeUpgrade>
-    <CodeUninstall Type="pre"><![CDATA[
-        $Kernel::OM->Get('var::packagesetup::WebserviceCustomerOperations')->CodeUninstall();
-    ]]></CodeUninstall>
 </otobo_package>
