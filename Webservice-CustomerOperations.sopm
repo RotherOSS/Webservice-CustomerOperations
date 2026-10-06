@@ -22,4 +22,7 @@
     <CodeUpgrade Type="post"><![CDATA[
         $Kernel::OM->Get('var::packagesetup::WebserviceCustomerOperations')->CodeUpgrade();
     ]]></CodeUpgrade>
+    <CodeUninstall Type="post"><![CDATA[
+        $Kernel::OM->Get('var::packagesetup::WebserviceCustomerOperations')->CodeUninstall();
+    ]]></CodeUninstall>
 </otobo_package>
