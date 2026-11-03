@@ -356,6 +356,9 @@ sub _CustomerUserUpsert {
             }
         }
 
+        # UserCustomerID is optional on update, keep the current one if none is given
+        $CustomerUser->{UserCustomerID} ||= $User{UserCustomerID};
+
         my $Success = $CustomerUserObject->CustomerUserUpdate(
             %{$CustomerUser},
             UserID => $Param{UserID},
