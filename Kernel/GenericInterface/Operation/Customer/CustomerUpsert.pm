@@ -349,13 +349,12 @@ sub _CustomerUpsert {
 
         # check if new CustomerID already exists
         if ( $Customer->{CustomerID} ne $Customer->{CustomerCompanyID} ) {
-            my %Result = $CustomerObject->CustomerCompanyGet( User => $Customer->{CustomerID} );
+            my %Result = $CustomerObject->CustomerCompanyGet( CustomerID => $Customer->{CustomerID} );
             if (%Result) {
-                $Kernel::OM->Get('Kernel::System::Log')->Log(
-                    Priority => 'error',
-                    Message  => $Kernel::OM->Get('Kernel::Language')->Translate( 'Customer "%s" already exists.', $Customer->{CustomerID} ),
-                );
-                return;
+                return {
+                    Success      => 0,
+                    ErrorMessage => "Customer \"$Customer->{CustomerID}\" already exists.",
+                };
             }
         }
 

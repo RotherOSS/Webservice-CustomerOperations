@@ -344,6 +344,18 @@ sub _CustomerUserUpsert {
         UserID => $Param{UserID},
     );
     if (%User) {
+
+        # check if new UserLogin already exists
+        if ( $CustomerUser->{UserLogin} ne $CustomerUser->{ID} ) {
+            my %Result = $CustomerUserObject->CustomerUserDataGet( User => $CustomerUser->{UserLogin} );
+            if (%Result) {
+                return {
+                    Success      => 0,
+                    ErrorMessage => "Customer user \"$CustomerUser->{UserLogin}\" already exists.",
+                };
+            }
+        }
+
         my $Success = $CustomerUserObject->CustomerUserUpdate(
             %{$CustomerUser},
             UserID => $Param{UserID},
