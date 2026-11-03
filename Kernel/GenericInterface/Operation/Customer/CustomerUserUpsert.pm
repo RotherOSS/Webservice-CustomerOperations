@@ -288,7 +288,7 @@ sub _CheckCustomerUser {
         if ( !$CustomerUser->{$Needed} ) {
             return {
                 ErrorCode    => 'CustomerUserUpsert.MissingParameter',
-                ErrorMessage => "CustomerUseUpsertt: CustomerUser->$Needed parameter is missing!",
+                ErrorMessage => "CustomerUserUpsert: CustomerUser->$Needed parameter is missing!",
             };
         }
     }
@@ -373,7 +373,7 @@ sub _CustomerUserUpsert {
         if ( !$CustomerUser->{UserCustomerID} ) {
             return {
                 ErrorCode    => 'CustomerUserUpsert.MissingParameter',
-                ErrorMessage => "CustomerUseUpsertt: CustomerUser->UserCustomerID parameter is missing!",
+                ErrorMessage => "CustomerUserUpsert: CustomerUser->UserCustomerID parameter is missing!",
             };
         }
 

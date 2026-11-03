@@ -99,31 +99,6 @@ sub Init {
     };
 }
 
-=head2 ValidateUserID()
-
-checks if the given user ID is valid.
-
-    my $Success = $CommonObject->ValidateUserID(
-        UserID => 123,
-    );
-
-returns
-
-    $Success = 1            # or undef
-
-=cut
-
-sub ValidateUserID {
-    my ( $Self, %Param ) = @_;
-
-    # check needed stuff
-    return if !$Param{UserID};
-
-    return $Self->_ValidateUser(
-        UserID => $Param{UserID} || '',
-    );
-}
-
 1;
 
 =head1 TERMS AND CONDITIONS
