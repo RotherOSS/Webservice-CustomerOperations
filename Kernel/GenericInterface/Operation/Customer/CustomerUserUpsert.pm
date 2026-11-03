@@ -241,6 +241,14 @@ sub Run {
             $Result->{Success}      = 0;
             $Result->{ErrorMessage} = $UpsertResult->{ErrorMessage};
 
+            if ( $UpsertResult->{ErrorCode} ) {
+                $Result->{ErrorMessage} = "$UpsertResult->{ErrorCode}: $UpsertResult->{ErrorMessage}";
+                $Result->{Data}->{Error} = {
+                    ErrorCode    => $UpsertResult->{ErrorCode},
+                    ErrorMessage => $UpsertResult->{ErrorMessage},
+                };
+            }
+
             return $Result;
         }
 
@@ -311,15 +319,14 @@ updates or inserts a customer user.
     returns:
 
     $Response = {
-        Success => 1,                                                 # if everething is OK
-        Data    => {
-            CustomerUserID => 123,
-        }
+        Success    => 1,                                              # if everything is OK
+        UserLogin  => 'tc',
     }
 
     $Response = {
-        Success      => 0,                                            # if unexpected error
-        ErrorMessage => "$Param{ErrorCode}: $Param{ErrorMessage}",
+        Success      => 0,                                            # if an error occurred
+        ErrorCode    => 'Function.Error',                             # optional
+        ErrorMessage => 'Error description',
     }
 
 =cut
@@ -372,9 +379,11 @@ sub _CustomerUserUpsert {
         }
     }
     else {
+
         # when adding a new customer user, the customer (company) is required
         if ( !$CustomerUser->{UserCustomerID} ) {
             return {
+                Success      => 0,
                 ErrorCode    => 'CustomerUserUpsert.MissingParameter',
                 ErrorMessage => "CustomerUserUpsert: CustomerUser->UserCustomerID parameter is missing!",
             };

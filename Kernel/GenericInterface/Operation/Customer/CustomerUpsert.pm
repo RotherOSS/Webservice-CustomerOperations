@@ -246,6 +246,14 @@ sub Run {
             $Result->{Success}      = 0;
             $Result->{ErrorMessage} = $UpsertResult->{ErrorMessage};
 
+            if ( $UpsertResult->{ErrorCode} ) {
+                $Result->{ErrorMessage} = "$UpsertResult->{ErrorCode}: $UpsertResult->{ErrorMessage}";
+                $Result->{Data}->{Error} = {
+                    ErrorCode    => $UpsertResult->{ErrorCode},
+                    ErrorMessage => $UpsertResult->{ErrorMessage},
+                };
+            }
+
             return $Result;
         }
 
@@ -316,15 +324,14 @@ updates or inserts a customer.
     returns:
 
     $Response = {
-        Success => 1,                                                 # if everething is OK
-        Data    => {
-            CustomerID => 123,
-        }
+        Success    => 1,                                              # if everything is OK
+        CustomerID => 'test.com',
     }
 
     $Response = {
-        Success      => 0,                                            # if unexpected error
-        ErrorMessage => "$Param{ErrorCode}: $Param{ErrorMessage}",
+        Success      => 0,                                            # if an error occurred
+        ErrorCode    => 'Function.Error',                             # optional
+        ErrorMessage => 'Error description',
     }
 
 =cut
