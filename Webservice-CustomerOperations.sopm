@@ -13,5 +13,7 @@
         <File Permission="660" Location="Kernel/GenericInterface/Operation/Customer/CustomerUpsert.pm" />
         <File Permission="660" Location="Kernel/GenericInterface/Operation/Customer/CustomerUserUpsert.pm" />
         <File Permission="660" Location="Kernel/Config/Files/XML/WebserviceCustomerOperations.xml" />
+        <File Permission="660" Location="scripts/test/GenericInterface/Operation/Customer/CustomerUpsert.t" />
+        <File Permission="660" Location="scripts/test/GenericInterface/Operation/Customer/CustomerUserUpsert.t" />
     </Filelist>
 </otobo_package>
