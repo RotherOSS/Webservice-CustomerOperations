@@ -6,8 +6,9 @@
     <Vendor>Rother OSS GmbH</Vendor>
     <URL>https://otobo.io/</URL>
     <License>GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007</License>
-    <Description Lang="de">Verbesserungen am GenericInterface</Description>
-    <Description Lang="en">Enhancements for the GenericInterface</Description>
+    <Description Lang="en">Enhancements for the generic interface.</Description>
+    <Description Lang="de">Verbesserungen am GenericInterface.</Description>
+    <Description Lang="hu">Továbbfejlesztések az általános felülethez.</Description>
     <Filelist>
         <File Permission="660" Location="Kernel/GenericInterface/Operation/Customer/Common.pm" />
         <File Permission="660" Location="Kernel/GenericInterface/Operation/Customer/CustomerUpsert.pm" />
